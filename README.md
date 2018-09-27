@@ -1,6 +1,6 @@
 # Sudoku
 Fast sudoku solver in Rust
 
-In Sudokus there is test sudoku (49151 17 clues sudokus)
+In the sudokus folder, there are test sudoku (49151 17 clues sudoku)
 
-On my computer it makes all of them in ~1 min
+On my computer, it does them all in ~ 1 min
