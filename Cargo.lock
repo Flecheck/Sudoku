@@ -43,7 +43,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sudoku-constraints"
+name = "sudoku"
 version = "0.1.0"
 dependencies = [
  "bit-set 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
