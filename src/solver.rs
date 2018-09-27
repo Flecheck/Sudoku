@@ -167,15 +167,10 @@ impl Solver {
             let mut changed = true;
             while !todo.is_empty() && changed {
                 changed = false;
-                let (done, mut to_go): (Vec<_>, Vec<_>) =
+                let (mut done, mut to_go): (Vec<_>, Vec<_>) =
                     todo.into_iter().partition(|(is, xs)| is.len() == xs.len());
 
-                let d: Vec<usize> = done
-                    .iter()
-                    .filter(|x| x.0.len() < 4) // Care if removing because it need to be remouved in 2 places
-                    .flat_map(|(_, xs)| xs.iter())
-                    .cloned()
-                    .collect();
+                let d: Vec<usize> = done.iter().flat_map(|(_, xs)| xs.iter()).cloned().collect();
 
                 for (_, xs) in to_go.iter_mut() {
                     *xs = xs
@@ -192,7 +187,7 @@ impl Solver {
                 }
 
                 todo = to_go;
-                modif.extend(done.into_iter().filter(|x| x.0.len() < 4));
+                modif.append(&mut done);
             }
         }
 
