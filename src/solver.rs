@@ -211,6 +211,10 @@ impl Solver {
         }
 
         self.instance.smart += 1;
+        if self.instance.back >= 27 {
+            self.instance.back -= 27;
+            self.instance.smart -= 27;
+        }
     }
 }
 
