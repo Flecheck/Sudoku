@@ -14,7 +14,8 @@ enum Case {
 struct Instance {
     sudoku: [[Case; 9]; 9],
     queue: PriorityQueue<(usize, usize), usize>,
-    smart: bool,
+    smart: usize,
+    back: usize,
 }
 
 #[derive(Clone, Debug)]
@@ -71,7 +72,8 @@ impl Solver {
             instance: Instance {
                 sudoku: possibilities,
                 queue: queue,
-                smart: false,
+                smart: 0,
+                back: 0,
             },
             stack: Vec::new(),
         }
@@ -93,7 +95,7 @@ impl Solver {
     pub fn solve(&mut self) {
         while let Some((&(i, j), &p)) = self.instance.queue.peek() {
             if p == 8 {
-                self.instance.smart = false;
+                self.instance.back = self.instance.smart;
                 let c = match self.instance.sudoku[i][j] {
                     Case::Possibilities(ref mut b) => {
                         b.iter().next().expect("Queue and sudoku not in sync")
@@ -105,7 +107,7 @@ impl Solver {
                 self.update(i, j, c);
             } else if p == 9 {
                 self.instance = self.stack.pop().expect("Sudoku impossible")
-            } else if self.instance.smart {
+            } else if self.instance.smart - self.instance.back == 27 {
                 let c = match self.instance.sudoku[i][j] {
                     Case::Possibilities(ref mut b) => {
                         let c = b.iter().next().expect("Queue and sudoku not in sync");
@@ -141,7 +143,8 @@ impl Solver {
 
     fn smart(&mut self) {
         let mut modif = Vec::new();
-        for part in PARTS.iter() {
+        let part = &PARTS[self.instance.smart % 27];
+        {
             let map = part
                 .iter()
                 .map(|&(i, j)| ((i, j), &self.instance.sudoku[i][j]))
@@ -207,7 +210,7 @@ impl Solver {
             }
         }
 
-        self.instance.smart = true;
+        self.instance.smart += 1;
     }
 }
 
