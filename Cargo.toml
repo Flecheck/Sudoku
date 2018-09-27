@@ -1,5 +1,5 @@
 [package]
-name = "sudoku-constraints"
+name = "sudoku"
 version = "0.1.0"
 authors = ["Flecheck <bessou.mathieu@gmail.com>"]
 
