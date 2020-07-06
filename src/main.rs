@@ -1,11 +1,11 @@
 mod solver;
 mod sudoku;
 
-extern crate bit_set;
-extern crate priority_queue;
+
+
 #[macro_use]
 extern crate lazy_static;
-extern crate itertools;
+
 
 use std::io;
 use std::io::BufRead;
