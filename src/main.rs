@@ -11,11 +11,11 @@ use std::io;
 use std::io::BufRead;
 use std::io::Write;
 
-use std::time::Duration;
-use std::time::Instant;
 
-use solver::Solver;
-use sudoku::Sudoku;
+
+
+use crate::solver::Solver;
+use crate::sudoku::Sudoku;
 
 use itertools::Itertools;
 

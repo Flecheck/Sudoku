@@ -2,7 +2,7 @@ use bit_set::BitSet;
 use priority_queue::PriorityQueue;
 use std::collections::HashMap;
 use std::{mem, ptr};
-use sudoku::Sudoku;
+use crate::sudoku::Sudoku;
 
 #[derive(Clone, Debug)]
 enum Case {
