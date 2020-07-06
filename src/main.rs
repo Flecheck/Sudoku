@@ -1,5 +1,3 @@
-#![feature(const_fn, nll)]
-
 mod solver;
 mod sudoku;
 
