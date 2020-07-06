@@ -9,7 +9,7 @@ extern crate lazy_static;
 
 use std::io;
 use std::io::BufRead;
-use std::io::Write;
+// use std::io::Write;
 
 
 
@@ -22,7 +22,7 @@ use itertools::Itertools;
 fn main() {
     let stdin = io::stdin();
     let stdout = io::stdout();
-    let mut stdout = stdout.lock();
+    let mut _stdout = stdout.lock();
     let lines = stdin.lock().lines();
 
     lines.for_each(|line| {
@@ -37,7 +37,6 @@ fn main() {
         let sudoku = Sudoku { cases: sudoku };
         let mut solver = Solver::new(&sudoku);
         solver.solve();
-        let res = solver.into_sudoku();
-        writeln!(stdout, "{}", res);
+        let _res = solver.into_sudoku();
     });
 }

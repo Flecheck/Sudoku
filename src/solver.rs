@@ -1,8 +1,8 @@
 use bit_set::BitSet;
-use priority_queue::PriorityQueue;
+use keyed_priority_queue::{KeyedPriorityQueue,Entry};
 use std::collections::HashMap;
-use std::{mem, ptr};
 use crate::sudoku::Sudoku;
+use array_macro::array;
 
 #[derive(Clone, Debug)]
 enum Case {
@@ -13,7 +13,7 @@ enum Case {
 #[derive(Clone, Debug)]
 struct Instance {
     sudoku: [[Case; 9]; 9],
-    queue: PriorityQueue<(usize, usize), usize>,
+    queue: KeyedPriorityQueue<(usize, usize), usize>,
     smart: usize,
     back: usize,
 }
@@ -26,20 +26,9 @@ pub struct Solver {
 
 impl Solver {
     pub fn new(sudoku: &Sudoku) -> Solver {
-        let mut possibilities = unsafe {
-            let mut constraints: [[Case; 9]; 9] = mem::uninitialized();
-            for line in constraints.iter_mut() {
-                let mut l: [Case; 9] = mem::uninitialized();
-                for case in l.iter_mut() {
-                    let c = Case::Possibilities(BitSet::from_bytes(&[0b0111_1111, 0b1100_0000]));
-                    ptr::write(case, c);
-                }
-                ptr::write(line, l);
-            }
-            constraints
-        };
+        let mut possibilities = array![array![Case::Possibilities(BitSet::from_bytes(&[0b0111_1111, 0b1100_0000]));9];9];
 
-        let mut queue = PriorityQueue::new();
+        let mut queue = KeyedPriorityQueue::new();
 
         for i in 0..9 {
             for j in 0..9 {
@@ -86,7 +75,13 @@ impl Solver {
                 Case::Val(_) => {}
                 Case::Possibilities(ref mut b) => {
                     if b.remove(val) {
-                        self.instance.queue.change_priority_by(&(i, j), |x| x + 1)
+                        match self.instance.queue.entry((i,j)) {
+                            Entry::Occupied(entry) => {
+                                let priority = entry.get_priority() + 1;
+                                entry.set_priority(priority)
+                            },
+                            Entry::Vacant(_) => unreachable!(),
+                        };
                     };
                 }
             });
@@ -112,8 +107,13 @@ impl Solver {
                     Case::Possibilities(ref mut b) => {
                         let c = b.iter().next().expect("Queue and sudoku not in sync");
                         b.remove(c);
-                        self.instance.queue.change_priority_by(&(i, j), |x| x + 1);
-                        c
+                        match self.instance.queue.entry((i,j)) {
+                            Entry::Occupied(entry) => {
+                                let priority = entry.get_priority() + 1;
+                                entry.set_priority(priority)
+                            },
+                            Entry::Vacant(_) => unreachable!(),
+                        };                       c
                     }
                     Case::Val(_) => panic!("Val in queue"),
                 };
@@ -201,7 +201,7 @@ impl Solver {
                         *b = bitset.clone();
                     }
                 }
-                self.instance.queue.change_priority(&(i, j), priority);
+                self.instance.queue.set_priority(&(i, j), priority).unwrap();
             }
         }
 
@@ -235,41 +235,35 @@ lazy_static! {
 }
 
 fn constraints() -> [[Vec<(usize, usize)>; 9]; 9] {
-    let constraints = unsafe {
-        let mut constraints: [[Vec<(usize, usize)>; 9]; 9] = mem::uninitialized();
-        for (xc, line) in constraints.iter_mut().enumerate() {
-            let mut l: [Vec<(usize, usize)>; 9] = mem::uninitialized();
-            for (yc, case) in l.iter_mut().enumerate() {
-                let mut c = Vec::new();
 
-                for x in 0..9 {
-                    if x != xc {
-                        c.push((x, yc));
-                    }
+    let mut constraints = array![array![Vec::new();9];9];
+
+    for xc in 0..9 {
+        for yc in 0..9 {
+            let ref mut c = constraints[xc][yc];
+            for x in 0..9 {
+                if x != xc {
+                    c.push((x, yc));
                 }
-
-                for y in 0..9 {
-                    if y != yc {
-                        c.push((xc, y));
-                    }
-                }
-
-                let gridx = (xc / 3) * 3;
-                let gridy = (yc / 3) * 3;
-
-                for x in gridx..gridx + 3 {
-                    for y in gridy..gridy + 3 {
-                        if x != xc && y != yc {
-                            c.push((x, y));
-                        }
-                    }
-                }
-
-                ptr::write(case, c);
             }
-            ptr::write(line, l);
+
+            for y in 0..9 {
+                if y != yc {
+                    c.push((xc, y));
+                }
+            }
+
+            let gridx = (xc / 3) * 3;
+            let gridy = (yc / 3) * 3;
+
+            for x in gridx..gridx + 3 {
+                for y in gridy..gridy + 3 {
+                    if x != xc && y != yc {
+                        c.push((x, y));
+                    }
+                }
+            }
         }
-        constraints
-    };
+    }
     constraints
 }
